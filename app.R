@@ -39,7 +39,7 @@ ui <- dashboardPage(
     dashboardHeader(title = "Covid-19 Dash"),
     dashboardSidebar(
         selectizeInput(
-            'state', 'State', choices = state1,
+            'state', 'State', choices = state1 ,selected = "China",
             options = list(
                 placeholder = 'Type to search for Country', create=TRUE)
         )),
@@ -115,42 +115,37 @@ server <- function(input, output) {
         
         output$case1 <- renderPlotly({
             
-            fig <- plot_ly(covid1, x = ~DateRep, y = ~cumcase, name = ~paste(covid1[2,7]), type = 'scatter', mode = 'lines',
+            fig <- plot_ly(covid1, x = ~DateRep, y = ~cumcase, name = ~paste(covid1[2,7]), width = 660, height = 300, type = 'scatter', mode = 'lines',
                            line = list(color = 'orange', width = 4)) %>%
                 
-                layout(title = ~paste(input$state))%>% config(displayModeBar = F) 
-            
-            figg<- fig %>%layout(
-                xaxis = list(
-                    title = 'Date')) %>%
+                layout(title = ~paste(input$state))%>% plotly::config(displayModeBar = F)%>%layout(
+                    xaxis = list(
+                        title = 'Date')) %>%
                 layout(
-                    yaxis=list(title="")) %>% layout(autosize = F, width = 580, height = 300)
-            figg
+                    yaxis=list(title="")) %>% layout(autosize = F)
+            fig
         })
         
         
         output$death1 <- renderPlotly({
             
-            fig1 <- plot_ly(covid1, x = ~DateRep, y = ~cumdeath, name = ~paste(covid1[2,7]), type = 'scatter', mode = 'lines',
+            fig1 <- plot_ly(covid1, x = ~DateRep, y = ~cumdeath, name = ~paste(covid1[2,7]),width = 660, height = 300, type = 'scatter', mode = 'lines',
                             line = list(color = 'red', width = 4)) %>%
-                layout(title = ~paste(input$state))%>% config(displayModeBar = F) 
-            
-            fig2<- fig1 %>% layout(
-                xaxis = list(
-                    title = 'Date'
-                )) %>%
+                layout(title = ~paste(input$state))%>%  plotly::config(displayModeBar = F) %>% layout(
+                    xaxis = list(
+                        title = 'Date'
+                    )) %>%
                 layout(
-                    yaxis=list(title="")) %>% layout(autosize = F, width = 580, height = 300)
+                    yaxis=list(title="")) %>% layout(autosize = F)
             
-            
-            fig2
+            fig1
             
             
         })
         
         output$wwplot <- renderPlotly({
             
-            fig1 <-  plot_ly(s, x = ~DateRep, y = ~cumwcase, color = ~country, hoverinfo = "text",
+            fig2 <-  plot_ly(s, x = ~DateRep, y = ~cumwcase, color = ~country, hoverinfo = "text",width = 1350, height = 380,
                              hovertext = paste("State :", s$country,
                                                "<br> Cases :", s$cumwcase),
                              name = "", type = 'scatter', mode = 'lines',
@@ -159,10 +154,10 @@ server <- function(input, output) {
                 layout(title = ~paste("Total Cases in Worldwide")) %>% 
                 layout(xaxis = list(title = 'Date')) %>%
                 layout(yaxis=list(title=""))%>%
-                config(displayModeBar = F) %>% layout(showlegend = FALSE)%>% 
-                layout(autosize = F, width = 1230, height = 300)
+                plotly::config(displayModeBar = F) %>% layout(showlegend = FALSE)%>% 
+                layout(autosize = F)
             
-            fig1
+            fig2
             
         })
         
