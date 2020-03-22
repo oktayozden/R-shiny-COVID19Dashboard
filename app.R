@@ -11,9 +11,9 @@ library(httr)
 
 # load files from Canada Nutrient File
 
-url1 <-'https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-2020-03-18.xls'
+url1 <-'https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-2020-03-21.xlsx'
 
-GET(url1, write_disk(tf <- tempfile(fileext = ".xls")))
+GET(url1, write_disk(tf <- tempfile(fileext = ".xlsx")))
 covid19 <- read_excel(tf)
 covid19$country<-covid19$`Countries and territories`
 covid<- select(covid19, c("DateRep","Day","Month","Cases","Deaths","GeoId","country"))
@@ -27,11 +27,7 @@ state1<-as.character(state1)
 
 covid_num<-select(covid19, c("Day","Cases", "Deaths"))
 a<-covid_num %>%
-    adorn_totals("row")
-total<-a[5530,]
-
-
-
+    adorn_totals("row")%>%slice(n())
 
 
 
@@ -119,8 +115,8 @@ server <- function(input, output) {
                            line = list(color = 'orange', width = 4)) %>%
                 
                 layout(title = ~paste(input$state))%>% plotly::config(displayModeBar = F)%>%layout(
-                    xaxis = list(
-                        title = 'Date')) %>%
+                xaxis = list(
+                    title = 'Date')) %>%
                 layout(
                     yaxis=list(title="")) %>% layout(autosize = F)
             fig
@@ -132,12 +128,12 @@ server <- function(input, output) {
             fig1 <- plot_ly(covid1, x = ~DateRep, y = ~cumdeath, name = ~paste(covid1[2,7]),width = 660, height = 300, type = 'scatter', mode = 'lines',
                             line = list(color = 'red', width = 4)) %>%
                 layout(title = ~paste(input$state))%>%  plotly::config(displayModeBar = F) %>% layout(
-                    xaxis = list(
-                        title = 'Date'
-                    )) %>%
+                xaxis = list(
+                    title = 'Date'
+                )) %>%
                 layout(
                     yaxis=list(title="")) %>% layout(autosize = F)
-            
+        
             fig1
             
             
@@ -172,7 +168,7 @@ server <- function(input, output) {
                      "Worldwide", icon = icon("skull"), color = "red")
         })
         output$reco <- renderValueBox({
-            valueBox(paste0("Recovery: ", "82301"),
+            valueBox(paste0("Recovery: ", "95101"),
                      "Worldwide", icon = icon("plus-square"), color = "green")
         })
     })
