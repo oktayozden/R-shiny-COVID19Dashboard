@@ -11,10 +11,18 @@ library(httr)
 
 # load files from Canada Nutrient File
 
-url1 <-'https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-2020-03-21.xlsx'
+# url1 <-'https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-2020-03-21.xlsx'
+#GET(url1, write_disk(tf <- tempfile(fileext = ".xlsx")))
+#covid19 <- read_excel(tf)
 
-GET(url1, write_disk(tf <- tempfile(fileext = ".xlsx")))
+
+
+url <- paste("https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-",format(Sys.time(), "%Y-%m-%d"), ".xlsx", sep = "")
+#download the dataset from the website to a local temporary file
+GET(url, authenticate(":", ":", type="ntlm"), write_disk(tf <- tempfile(fileext = ".xlsx")))
+#read the Dataset sheet into “R”
 covid19 <- read_excel(tf)
+
 covid19$country<-covid19$`Countries and territories`
 covid<- select(covid19, c("DateRep","Day","Month","Cases","Deaths","GeoId","country"))
 text2<-covid$country
@@ -160,11 +168,11 @@ server <- function(input, output) {
         
         # value boxes
         output$cases <- renderValueBox({
-            valueBox(paste0("Cases: ", total$Cases), 
+            valueBox(paste0("Cases: ", a$Cases), 
                      "Worldwide", icon = icon("fire"), color = "yellow")
         })
         output$death <- renderValueBox({
-            valueBox(paste0("Death: ", total$Deaths),
+            valueBox(paste0("Death: ", a$Deaths),
                      "Worldwide", icon = icon("skull"), color = "red")
         })
         output$reco <- renderValueBox({
