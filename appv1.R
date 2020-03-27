@@ -23,8 +23,8 @@ GET(url, authenticate(":", ":", type="ntlm"), write_disk(tf <- tempfile(fileext 
 #read the Dataset sheet into “R”
 covid19 <- read_excel(tf)
 
-covid19$country<-covid19$`Countries and territories`
-covid<- select(covid19, c("DateRep","Day","Month","Cases","Deaths","GeoId","country"))
+covid19$country<-covid19$countriesAndTerritories
+covid<- select(covid19, c("dateRep","day","month","cases","deaths","geoId","country"))
 text2<-covid$country
 text3<-data_frame(text2)
 text3<-table(text3)
@@ -33,7 +33,7 @@ state1<-text4$text3
 state1<-as.character(state1)
 
 
-covid_num<-select(covid19, c("Day","Cases", "Deaths"))
+covid_num<-select(covid19, c("day","cases", "deaths"))
 a<-covid_num %>%
     adorn_totals("row")%>%slice(n())
 
@@ -86,13 +86,13 @@ server <- function(input, output) {
         
         
         
-        covid1<- select(covid, c("DateRep","Day","Month","Cases","Deaths","GeoId","country"))%>%
+        covid1<- select(covid, c("dateRep","day","month","cases","deaths","geoId","country"))%>%
             filter(country==(input$state))
         
         
         
-        covid1<-covid1 %>% mutate(DateRep = ymd(DateRep))
-        covid1<- covid1[order(covid1$DateRep),]
+        covid1<-covid1 %>% mutate(dateRep = ymd(dateRep))
+        covid1<- covid1[order(covid1$dateRep),]
         
         covid1$cumcase<- cumsum(covid1[, 4])
         covid1$cumcase<-as.numeric(as.character(unlist(covid1$cumcase)))
@@ -102,18 +102,18 @@ server <- function(input, output) {
         
         ##worldwide
         covidw1<-covid19
-        tar<-covid19$DateRep[1]
-        covidw1<-covidw1 %>% mutate(DateRep=ymd(DateRep))
-        covidw1<-covidw1[order(covidw1$DateRep),]
+        tar<-covid19$dateRep[1]
+        covidw1<-covidw1 %>% mutate(dateRep=ymd(dateRep))
+        covidw1<-covidw1[order(covidw1$dateRep),]
         
         s<-covidw1[order(covidw1$country),]
         
-        s<-s %>% group_by(country) %>%mutate(cumwcase=cumsum(Cases))
-        s<-filter(s,GeoId !="CN")
+        s<-s %>% group_by(country) %>%mutate(cumwcase=cumsum(cases))
+        s<-filter(s,geoId !="CN")
         
         ##worldwide Pie Chart
-        s1<-s %>% group_by(country) %>%mutate(cumwcase1=cumsum(Deaths))
-        s2<- filter(s1, DateRep==paste(tar))
+        s1<-s %>% group_by(country) %>%mutate(cumwcase1=cumsum(deaths))
+        s2<- filter(s1, dateRep==paste(tar))
         s3<-s2 %>%
             adorn_totals("row")%>%slice(n())
         s3<-s3$cumwcase1
@@ -125,7 +125,7 @@ server <- function(input, output) {
         
         output$case1 <- renderPlotly({
             
-            fig <- plot_ly(covid1, x = ~DateRep, y = ~cumcase, name = ~paste(covid1[2,7]), width = 660, height = 300, type = 'scatter', mode = 'lines',
+            fig <- plot_ly(covid1, x = ~dateRep, y = ~cumcase, name = ~paste(covid1[2,7]), width = 660, height = 300, type = 'scatter', mode = 'lines',
                            line = list(color = 'orange', width = 4)) %>%
                 
                 layout(title = ~paste(input$state))%>% plotly::config(displayModeBar = F)%>%layout(
@@ -139,7 +139,7 @@ server <- function(input, output) {
         
         output$death1 <- renderPlotly({
             
-            fig1 <- plot_ly(covid1, x = ~DateRep, y = ~cumdeath, name = ~paste(covid1[2,7]),width = 660, height = 300, type = 'scatter', mode = 'lines',
+            fig1 <- plot_ly(covid1, x = ~dateRep, y = ~cumdeath, name = ~paste(covid1[2,7]),width = 660, height = 300, type = 'scatter', mode = 'lines',
                             line = list(color = 'red', width = 4)) %>%
                 layout(title = ~paste(input$state))%>%  plotly::config(displayModeBar = F) %>% layout(
                     xaxis = list(
@@ -155,7 +155,7 @@ server <- function(input, output) {
         
         output$wwplot <- renderPlotly({
             
-            fig2 <-  plot_ly(s, x = ~DateRep, y = ~cumwcase, color = ~country, hoverinfo = "text",width = 660, height = 300,
+            fig2 <-  plot_ly(s, x = ~dateRep, y = ~cumwcase, color = ~country, hoverinfo = "text",width = 660, height = 300,
                              hovertext = paste("State :", s$country,
                                                "<br> Cases :", s$cumwcase),
                              name = "", type = 'scatter', mode = 'lines',
@@ -187,15 +187,15 @@ server <- function(input, output) {
         
         # value boxes
         output$cases <- renderValueBox({
-            valueBox(paste0("Cases: ", a$Cases), 
+            valueBox(paste0("Cases: ", a$cases), 
                      "Worldwide", icon = icon("fire"), color = "yellow")
         })
         output$death <- renderValueBox({
-            valueBox(paste0("Death: ", a$Deaths),
+            valueBox(paste0("Death: ", a$deaths),
                      "Worldwide", icon = icon("skull"), color = "red")
         })
         output$reco <- renderValueBox({
-            valueBox(paste0("Recovery: ", "95101"),
+            valueBox(paste0("Recovery: ", "130201"),
                      "Worldwide", icon = icon("plus-square"), color = "green")
         })
     })
