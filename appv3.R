@@ -41,15 +41,10 @@ covid19 <- read_excel(tf)
 #latlong
 
 
-
-
-
-
-
 covid19$country<-covid19$countriesAndTerritories
 covid<- select(covid19, c("dateRep","day","month","cases","deaths","geoId","country"))
 text2<-covid$country
-text3<-data_frame(text2)
+text3<-as.data.frame(text2)
 text3<-table(text3)
 text4<-as.data.frame(text3)
 state1<-text4$text3
@@ -78,12 +73,12 @@ ui <- dashboardPage(skin = "black",
                             menuItem("Worldmap", tabName="Worldmap", icon=icon("globe-americas")),
                             menuItem("Comparison", tabName="Comparison", icon = icon("balance-scale")),
                             checkboxGroupInput("checkGroup1", label = h4("Click for Comparison"), 
-                                               choices = list("Turkey" = "Turkey", "Italy" = "Italy", "Spain" = "Spain",
-                                                              "China"="China", "Germany"="Germany","Iran"="Iran","France"="France",
-                                                              "UK"="United_Kingdom", "USA"="United_States_of_America", "Belgium"="Belgium",
-                                                              "Netherlands"="Netherlands","Austria"="Austria", "South Korea"="South_Korea",
-                                                              "Canada"="Canada", "Portugal"="Portugal","Israel"="Israel","Brazil"="Brazil",
-                                                              "Australia"="Australia","Norway"="Norway","Sweden"="Sweden"),
+                                        choices = list("Turkey" = "Turkey", "Italy" = "Italy", "Spain" = "Spain",
+                                                  "China"="China", "Germany"="Germany","Iran"="Iran","France"="France",
+                                                  "UK"="United_Kingdom", "USA"="United_States_of_America", "Belgium"="Belgium",
+                                                  "Netherlands"="Netherlands","Austria"="Austria", "South Korea"="South_Korea",
+                                                  "Canada"="Canada", "Portugal"="Portugal","Israel"="Israel","Brazil"="Brazil",
+                                                  "Australia"="Australia","Norway"="Norway","Sweden"="Sweden", "Russia"="Russia"),
                                                selected = "Turkey")
 
                         )
@@ -141,7 +136,7 @@ server <- function(input, output) {
         covid1<- select(covid, c("dateRep","day","month","cases","deaths","geoId","country"))%>%
             filter(country==(input$state))
         
-        covid1<-covid1 %>% mutate(dateRep = ymd(dateRep))
+        covid1<-covid1 %>% mutate(dateRep = dmy(dateRep))
         covid1<- covid1[order(covid1$dateRep),]
         
         covid1$cumcase<- cumsum(covid1[, 4])
@@ -153,7 +148,7 @@ server <- function(input, output) {
         ##worldwide
         covidw1<-covid19
         tar<-covid19$dateRep[1]
-        covidw1<-covidw1 %>% mutate(dateRep=ymd(dateRep))
+        covidw1<-covidw1 %>% mutate(dateRep=dmy(dateRep))
         covidw1<-covidw1[order(covidw1$dateRep),]
         
         s<-covidw1[order(covidw1$country),]
@@ -179,7 +174,7 @@ server <- function(input, output) {
         
         ##worldwide Pie Chart
         s1<-s %>% group_by(country) %>%mutate(cumwcase1=cumsum(deaths))
-        s2<- filter(s1, dateRep==paste(tar))
+        s2<- filter(s1, dateRep==paste(tarih))
         s3<-s2 %>%
             adorn_totals("row")%>%slice(n())
         s3<-s3$cumwcase1
@@ -273,7 +268,7 @@ server <- function(input, output) {
                      "Worldwide", icon = icon("skull"), color = "red")
         })
         output$reco <- renderValueBox({
-            valueBox(paste0("Recovery: ", "514642"),
+            valueBox(paste0("Recovery: ", "1930512"),
                      "Worldwide", icon = icon("plus-square"), color = "green")
         })
         
@@ -320,7 +315,7 @@ server <- function(input, output) {
         output$map1 <- renderLeaflet({
          map1<-leaflet(data = lts1) %>% addTiles() %>% 
                 addCircleMarkers(~long,~lat, label = mytext, 
-                color = ~pal(cumwdeath), fillOpacity = 0.7, radius=~ sqrt(cumwcase/50), stroke=FALSE,popup = lts1$cumwcase,
+                color = ~pal(cumwdeath), fillOpacity = 0.7, radius=~ sqrt(cumwcase/100), stroke=FALSE,popup = lts1$cumwcase,
                 labelOptions = labelOptions( style = list("font-weight" = "normal", padding = "3px 8px"),
                 textsize = "13px", direction = "auto")) %>%
                 addLegend(pal=pal, values=~cumwdeath, opacity=0.9, title = "Death", position = "bottomright")%>%
@@ -344,3 +339,4 @@ server <- function(input, output) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
